@@ -61,6 +61,9 @@
 #elif defined(__AVR_ATmega8P__) || defined(__AVR_ATmega8__)
   #define IR_USE_TIMER1   // tx = pin 9
 
+#elif defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny44__)
+  #define IR_USE_TIMER1   // tx = pin 7 (OC0B, PA7)
+
 // Arduino Duemilanove, Diecimila, LilyPad, Mini, Fio, etc
 #else
   //#define IR_USE_TIMER1   // tx = pin 9
@@ -262,8 +265,15 @@ extern volatile irparams_t irparams;
 // defines for timer1 (16 bits)
 #elif defined(IR_USE_TIMER1)
 #define TIMER_RESET
-#define TIMER_ENABLE_PWM     (TCCR1A |= _BV(COM1A1))
-#define TIMER_DISABLE_PWM    (TCCR1A &= ~(_BV(COM1A1)))
+
+#if defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny44__)
+  #define TIMER_ENABLE_PWM     (TCCR1A |= _BV(COM0B0))
+  #define TIMER_DISABLE_PWM    (TCCR1A &= ~(_BV(COM0B0)))
+#else
+  #define TIMER_ENABLE_PWM     (TCCR1A |= _BV(COM1A1))
+  #define TIMER_DISABLE_PWM    (TCCR1A &= ~(_BV(COM1A1)))
+#endif
+
 #if defined(__AVR_ATmega8P__) || defined(__AVR_ATmega8__)
   #define TIMER_ENABLE_INTR    (TIMSK = _BV(OCIE1A))
   #define TIMER_DISABLE_INTR   (TIMSK = 0)
@@ -291,6 +301,8 @@ extern volatile irparams_t irparams;
 #define TIMER_PWM_PIN        11  /* Arduino Mega */
 #elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__)
 #define TIMER_PWM_PIN        13 /* Sanguino */
+#elif defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny44__)
+#define TIMER_PWM_PIN        7 /* TinySensor */
 #else
 #define TIMER_PWM_PIN        9  /* Arduino Duemilanove, Diecimila, LilyPad, etc */
 #endif
@@ -440,6 +452,10 @@ extern volatile irparams_t irparams;
 #define BLINKLED       13
 #define BLINKLED_ON()  (PORTB |= B10000000)
 #define BLINKLED_OFF() (PORTB &= B01111111)
+#elif defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny44__)
+#define BLINKLED       2
+#define BLINKLED_ON()  (PORTA |= B00000100)
+#define BLINKLED_OFF() (PORTA &= B11111011)
 #elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__)
 #define BLINKLED       0
 #define BLINKLED_ON()  (PORTD |= B00000001)
